@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator jQuery</title>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100svh;
+            padding: 16px;
+            display: grid;
+            place-items: center;
+            font-family: "DM Sans", Arial, sans-serif;
+            background: #e8ece8;
+            color: #f3f4ee;
+        }
+
+        .kalkulator {
+            width: min(100%, 360px);
+            min-width: 0;
+            padding: clamp(14px, 4vw, 22px);
+            border: 1px solid #38423e;
+            border-radius: 22px;
+            background: #26332e;
+            box-shadow: 0 14px 32px #24312a26, inset 0 1px #ffffff1f;
+        }
+
+        h1 { margin: 0 0 10px; font-size: 20px; letter-spacing: -.4px; }
+        .identitas { margin: 0 0 16px; }
+        .identitas dl {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 3px 10px;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        dt { color: #bfcbc2; }
+        dd { margin: 0; }
+
+        .layar {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            height: 72px;
+            margin: 0 0 14px;
+            padding: 10px 14px;
+            border: 2px solid #18241e;
+            border-radius: 9px;
+            background: #dbe4ca;
+            color: #253321;
+            box-shadow: inset 0 2px 4px #34452e26;
+            font: 500 34px/1.2 "IBM Plex Mono", Consolas, monospace;
+            text-align: right;
+        }
+
+        .tombol {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-rows: repeat(5, clamp(46px, 11vw, 56px));
+            gap: 8px;
+        }
+
+        button {
+            min-width: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 9px;
+            background: #eff1e8;
+            color: #213028;
+            font-family: inherit;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: inset 0 -2px #0002;
+        }
+
+        .operator { background: #b9cbc0; }
+        .clear, .hapus { background: #45594f; color: #fff; }
+
+        /* Tombol = menempati dua baris terakhir di sisi kanan. */
+        .sama-dengan {
+            grid-column: 4;
+            grid-row: 4 / span 2;
+            background: #ffc679;
+        }
+
+        .nol { grid-column: span 2; }
+
+        @media (hover: hover) {
+            button:hover { filter: brightness(1.07); }
+        }
+        button:active { transform: translateY(1px); }
+        button:focus-visible { outline: 3px solid #ffd596; outline-offset: 2px; }
+    </style>
+</head>
+<body>
+
+    <main class="kalkulator">
+        <header class="identitas">
+            <h1>Kalkulator jQuery</h1>
+            <dl>
+                <dt>NIM</dt><dd>255150301111025</dd>
+                <dt>Nama</dt><dd>Ahmad Dzaikra Javier</dd>
+            </dl>
+        </header>
+
+        <input type="text" id="layar" class="layar" value="0" aria-label="Layar kalkulator" readonly>
+
+        <div class="tombol">
+            <button class="clear" aria-label="Bersihkan semua">C</button>
+            <button class="hapus" aria-label="Hapus satu karakter">⌫</button>
+            <button class="operator" data-value="/" aria-label="Bagi">÷</button>
+            <button class="operator" data-value="*" aria-label="Kali">×</button>
+
+            <button class="angka" data-value="7">7</button>
+            <button class="angka" data-value="8">8</button>
+            <button class="angka" data-value="9">9</button>
+            <button class="operator" data-value="-" aria-label="Kurang">−</button>
+
+            <button class="angka" data-value="4">4</button>
+            <button class="angka" data-value="5">5</button>
+            <button class="angka" data-value="6">6</button>
+            <button class="operator" data-value="+">+</button>
+
+            <button class="angka" data-value="1">1</button>
+            <button class="angka" data-value="2">2</button>
+            <button class="angka" data-value="3">3</button>
+            <button class="sama-dengan">=</button>
+
+            <button class="angka nol" data-value="0">0</button>
+            <button class="angka" data-value=".">.</button>
+        </div>
+    </main>
+
+    <script>
+        $(document).ready(function () {
+            let ekspresi = "";
+
+            function tampilkanNilai(nilai) {
+                $("#layar").val(nilai);
+            }
+
+            $(".angka, .operator").click(function () {
+                let nilai = $(this).data("value").toString();
+
+                if (ekspresi === "Error") {
+                    ekspresi = "";
+                }
+
+                ekspresi += nilai;
+                tampilkanNilai(ekspresi);
+            });
+
+            $(".clear").click(function () {
+                ekspresi = "";
+                tampilkanNilai("0");
+            });
+
+            $(".hapus").click(function () {
+                ekspresi = ekspresi.slice(0, -1);
+
+                if (ekspresi === "") {
+                    tampilkanNilai("0");
+                } else {
+                    tampilkanNilai(ekspresi);
+                }
+            });
+
+            $(".sama-dengan").click(function () {
+                try {
+                    if (ekspresi === "") {
+                        tampilkanNilai("0");
+                        return;
+                    }
+
+                    let hasil = eval(ekspresi);
+
+                    if (!isFinite(hasil)) {
+                        ekspresi = "Error";
+                        tampilkanNilai("Error");
+                    } else {
+                        ekspresi = hasil.toString();
+                        tampilkanNilai(ekspresi);
+                    }
+                } catch (error) {
+                    ekspresi = "Error";
+                    tampilkanNilai("Error");
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
